@@ -93,14 +93,15 @@ if (p2 !=NULL & n2 != NULL){
 }
 
 ````
-[2] The dataset from Kamilar and Cooper has in it a large number of variables related to life history and body size. For this exercise, the end aim is to fit a simple linear regression model to predict longevity ("MaxLongevity_m") measured in months from species' brain size ("Brain_Size_Species_Mean") measured in grams. Do the following for both longevity~brain size and log(longevity)~log(brain size).
+##[2] 
+***The dataset from Kamilar and Cooper has in it a large number of variables related to life history and body size. For this exercise, the end aim is to fit a simple linear regression model to predict longevity ("MaxLongevity_m") measured in months from species' brain size ("Brain_Size_Species_Mean") measured in grams. Do the following for both longevity~brain size and log(longevity)~log(brain size).***
 
 ```{r}
 KC<- read.csv("https://raw.githubusercontent.com/difiore/ADA2016/master/KamilarAndCooperData.csv", stringsAsFactors=FALSE, sep=",")
 View(KC)
 ```
 
-### non logged data
+### For logged data:
 
 
 Fit the regression model and, using {ggplot2}, produce a scatterplot with the fitted line superimposed upon the data. Append the the fitted model equation to your plot (HINT: use the function geom_text()).
@@ -154,19 +155,6 @@ df<-as.data.frame(df)
 names(df)<- c("b_size", "long", "pred_long", "CIfit", "CIlwr", "CIupr", "PIfit", "PIlwr", "PIupr" )
 head(df)
  
-p <- ggplot(data = df, aes(x = b_size, y =long))
-p <- p + geom_point(alpha=1/2)
-p <- p + geom_line(aes(x =b_size , y = CIfit), colour = "CIfit")
-p <- p + geom_line(aes(x = b_size, y = CIlwr), colour = "CI")
-p <- p + geom_line(aes(x = b_size, y = CIupr), colour = "CI")
-p <- p + geom_text(aes(x=200,y=750,label=paste("y= 1.22 Bx + 249")))
-p <- p + geom_line(data = df, aes(x = b_size, y = PIlwr), colour = "PI")
-p <- p + geom_line(data = df, aes(x = b_size, y = PIupr), colour = "PI")
-p<- p + scale_colour_manual("", breaks= c("CFIT", "CI" , "CI", "PI", "PI"),   values=c("black", "blue","blue", "yellow" , "yellow"))
-p<- p + xlab(" ") +
-  scale_y_continuous("Longevity (months)") + 
-  labs(title="Relationship between brain size and species mean longevity")
-p
 
 p <- ggplot(data = df, aes(x = b_size, y =long))
 p <- p + geom_point(alpha=1/2)
@@ -177,19 +165,102 @@ geom_text(aes(x=150,y=790,label=paste("y= 1.22 Bx + 249")))+
 geom_line(data = df, aes(x = b_size, y = PIlwr, colour = "90% prediction interval"))+
 geom_line(data = df, aes(x = b_size, y = PIupr, colour = "90% prediction interval"))+
  scale_colour_manual("", breaks= c("predicted values", "90% confidence interval" ,  "90% prediction interval"), values=c("pink", "green", "purple"))+
-xlab(" ") +
+xlab("Mean species brain weight (g)") +
   scale_y_continuous("Longevity (months)") + 
   labs(title="Relationship between brain size and species mean longevity")
 p
-
-
-
-
 ```
+
+Produce a point estimate and associated 90 percent PI for the longevity of a species whose brain weight is 800 gm. Do you trust the model to predict observations accurately for this value of the explanatory variable? Why or why not?
+```{r}
+L800<- (1.218*800)+ 248.952
+L800 
+L800/12
+```
+ The model estimates that a species with a brain weight of 800g would live for 1223 years, or about 102 years on average. This isn't trustworthy, because have no data that even approach that weight, and very few data over about 200g.So we have little empirical support that this relationship is linear at such high brain weights.  
+
 
 
 
 ### logged data
 
+
+
+Fit the regression model and, using {ggplot2}, produce a scatterplot with the fitted line superimposed upon the data. Append the the fitted model equation to your plot (HINT: use the function geom_text()).
+```{r}
 hist(log(KC$MaxLongevity_m))
 hist(log(KC$Brain_Size_Species_Mean))
+
+BL<-lm(log(MaxLongevity_m) ~ log(Brain_Size_Species_Mean), data=KC)
+BL
+```
+
+So, the formula is roughly  y= 0.234Bx + 4.8790 
+
+```{r}
+pl <- ggplot(data = KC, aes(x = log(Brain_Size_Species_Mean), y = log(MaxLongevity_m)))
+pl <- pl + geom_point()
+pl <- pl + geom_text(aes(x=2,y=6.25,label=paste("y= 0.234Bx + 4.8790")))
+pl <- pl + geom_smooth(method = "lm", formula = y ~ x)
+pl <- pl + ylab("Longevity log(months)")
+pl <- pl + xlab("Log of mean Brain Volume in grams")
+pl
+```
+
+Identify and interpret the point estimate of the slope (β1), as well as the outcome of the test associated with the hypotheses H0: β1 = 0; HA: β1 ≠ 0. Also, find a 90 percent CI for the slope (β1) parameter.
+
+```{r}
+SBL<-summary(BL)
+```
+So, the estimate of slope (B1) is 1.2180. This means that on average,  longevity increases by 1.218 months with every 1 gram increase in brain size. and this significantly different from 0, with a p value of <2e-16. 
+```{r}
+ci<- confint(BL, level=0.90)
+ci
+```
+There is a 90% probability that the true slope of B1 falls between 1.04 and 1.40
+
+
+Using your model, add lines for the 90 percent confidence and prediction interval bands on the plot and add a legend to differentiate between the lines.
+
+
+```{r}
+df<-cbind(KC$log(Brain_Size_Species_Mean), KC$log(MaxLongevity_m))
+Long_Pred<- predict(BL, newdata=data.frame(log(Brain_Size_Species_Mean)=KC$log(Brain_Size_Species_Mean)))# predicts values of longevity given our model and all the brain sizes
+Brain_Size<-KC$log(Brain_Size_Species_Mean)
+Max_Long<-KC$log(MaxLongevity_m)
+df<-cbind(Brain_Size, Max_Long, Long_Pred)
+names(df)<- c("b_size", "long", "pred_long")
+head(df)
+ci <- predict(BL, newdata = data.frame(log(Brain_Size_Species_Mean)=KC$log(Brain_Size_Species_Mean)), interval = "confidence",  level = 0.90)  # conf for all 
+
+pi <- predict(BL, newdata = data.frame(log(Brain_Size_Species_Mean)=KC$log(Brain_Size_Species_Mean)), interval = "prediction",  level = 0.90)  # predict all 
+ 
+
+df<-cbind(df, ci, pi)
+df<-as.data.frame(df)
+names(df)<- c("b_size", "long", "pred_long", "CIfit", "CIlwr", "CIupr", "PIfit", "PIlwr", "PIupr" )
+head(df)
+ 
+
+p <- ggplot(data = df, aes(x = b_size, y =long))
+p <- p + geom_point(alpha=1/2)
+p <- p + geom_line(aes(x =b_size , y = CIfit, colour = "predicted values"))+
+geom_line(aes(x = b_size, y = CIlwr, colour = "90% confidence interval")) +
+ geom_line(aes(x = b_size, y = CIupr, colour = "90% confidence interval"))+
+geom_text(aes(x=150,y=790,label=paste("y= 1.22 Bx + 249")))+
+geom_line(data = df, aes(x = b_size, y = PIlwr, colour = "90% prediction interval"))+
+geom_line(data = df, aes(x = b_size, y = PIupr, colour = "90% prediction interval"))+
+ scale_colour_manual("", breaks= c("predicted values", "90% confidence interval" ,  "90% prediction interval"), values=c("pink", "green", "purple"))+
+xlab("Mean species brain weight (g)") +
+  scale_y_continuous("Longevity (months)") + 
+  labs(title="Relationship between brain size and species mean longevity")
+p
+```
+
+Produce a point estimate and associated 90 percent PI for the longevity of a species whose brain weight is 800 gm. Do you trust the model to predict observations accurately for this value of the explanatory variable? Why or why not?
+```{r}
+L800<- (1.218*800)+ 248.952
+L800 
+L800/12
+```
+ The model estimates that a species with a brain weight of 800g would live for 1223 years, or about 102 years on average. This isn't trustworthy, because have no data that even approach that weight, and very few data over about 200g.So we have little empirical support that this relationship is linear at such high brain weights.  

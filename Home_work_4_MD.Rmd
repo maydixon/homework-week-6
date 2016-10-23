@@ -16,11 +16,23 @@ z
 
 p <- 1 - pnorm(z, lower.tail = TRUE) + pnorm(z, lower.tail = FALSE)
 p
+
+## I cold logically move the 2-tailed version up to become the first level, and then use if to negate that if n2 and p2 were null
 ```{r}
 Z.prop.test <- function(p1, n1, p0, p2=NULL, n2=NULL, alternative="two.sided", conf.level=0.95){
+n1xp1.assumption.test <- n1*p1
+n1x1minusp1.assumption.test<- n1*(1-p1)
 
-if (p2== NULL | n2==NULL){
-       z <- (p1 - p0)/sqrt(p0 * (1 - p0)/n1)
+if (n1xp1.assumption.test<5 |n1x1minusp1.assumption.test*(1-p1)<5) {
+      warning("WARNING: not valid to assume normal distribution. (n1*p1<5 or n1*(1-p1)<5) ")
+      
+}
+
+
+      
+#if (p2== NULL | n2==NULL){
+      
+      z <- (p1 - p0)/sqrt(p0 * (1 - p0)/n1)
             z
             
       if (alternative == "less"){
@@ -38,22 +50,29 @@ if (p2== NULL | n2==NULL){
             p <- 2*pnorm(z)
             p
       }
-}
+#}
       
 if (p2 !=NULL & n2 != NULL){
      
+      n2xp2.assumption.test <- n2*p2
+      n2x1minusp2.assumption.test<- n2*(1-p2)
+
+      if (n2xp2.assumption.test<=5 |n2x1minusp2.assumption.test*(1-p2)<=5) {
+            warning("WARNING: not valid to assume normal distribution. (n2*p2<5 or n2*(1-p2)<5) ") 
+      }
+            
       pstar <- (p1+p2)/2
       z <- (p1 - p2)/sqrt((pstar * (1 - pstar)) * (1/n1 + 1/n2))
       
-      if (alternative=="two.tailed"){
-            
+      #if (alternative=="two.sided"){
+      #  2.sided is default    
             p <- 1 - pnorm(z, lower.tail = TRUE) + pnorm(z, lower.tail = FALSE)
             p
       
-      }
+      #}
       
       if (alternative=="greater"){
-            
+       #conditionally evaluated     
             p <- pnorm(z, lower.tail = FALSE)
             p
       
@@ -64,4 +83,6 @@ if (p2 !=NULL & n2 != NULL){
             p
       }
 }
+#output<-list(z, p, ci)
+#print(output)
 }

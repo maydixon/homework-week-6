@@ -83,6 +83,15 @@ if (p2 !=NULL & n2 != NULL){
             p
       }
 }
+#making confidence interval for p1
+#lower <- p1 + qnorm(0) * sqrt(p1 * (1 - p1)/n1)
+#upper <- p1 + qnorm(conf.level) * sqrt(p1 * (1 - p1)/n1)
+#ci <- c(lower, upper)
+#ci
 #output<-list(z, p, ci)
 #print(output)
 }
+
+````
+
+

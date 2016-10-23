@@ -93,5 +93,26 @@ if (p2 !=NULL & n2 != NULL){
 }
 
 ````
+[2] The dataset from Kamilar and Cooper has in it a large number of variables related to life history and body size. For this exercise, the end aim is to fit a simple linear regression model to predict longevity ("MaxLongevity_m") measured in months from species' brain size ("Brain_Size_Species_Mean") measured in grams. Do the following for both longevity~brain size and log(longevity)~log(brain size).
 
+```{r}
+KC<- read.csv("https://raw.githubusercontent.com/difiore/ADA2016/master/KamilarAndCooperData.csv", stringsAsFactors=FALSE, sep=",")
+View(KC)
+```
+
+### non logged data
+
+
+Fit the regression model and, using {ggplot2}, produce a scatterplot with the fitted line superimposed upon the data. Append the the fitted model equation to your plot (HINT: use the function geom_text()).
+```{r}
+library(ggplot2)
+BL<-lm(MaxLongevity_m ~ Brain_Size_Species_Mean, data=KC)
+
+summary(BL)
+#so formula is roughly y= 1.22 Bx + 249 
+p <- ggplot(data = KC, aes(x = Brain_Size_Species_Mean, y = MaxLongevity_m))
+p <- p + geom_point()
+p <- p + geom_text(aes(x=200,y=750,label=paste("y= 1.22 Bx + 249")))
+p <- p + geom_smooth(method = "lm", formula = y ~ x)
+p
 

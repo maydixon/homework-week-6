@@ -8,8 +8,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-note to self:
-**** I could logically move the 2-tailed version up to become the first level, and then use if to negate that if n2 and p2 were null****
+I'm vaguely resentful that you refered to the following as  a "simple function":
 
 ```{r}
 Z.prop.test <- function(p1, n1, p0, p2=NULL, n2=NULL, alternative="two.sided", conf.level=0.95){

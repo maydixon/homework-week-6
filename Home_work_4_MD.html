@@ -121,7 +121,7 @@ $(document).ready(function () {
 </div>
 
 
-<p>note to self: **** I could logically move the 2-tailed version up to become the first level, and then use if to negate that if n2 and p2 were null****</p>
+<p>I’m vaguely resentful that you refered to the following as a “simple function”:</p>
 <pre class="r"><code>Z.prop.test &lt;- function(p1, n1, p0, p2=NULL, n2=NULL, alternative=&quot;two.sided&quot;, conf.level=0.95){
 
 n1xp1.assumption.test &lt;- n1*p1
@@ -149,7 +149,7 @@ if (is.null(p2) | is.null(n2)) {
             p &lt;- pnorm(z, lower.tail = FALSE)
             p
       }
-      if (alternative == &quot;two.tailed&quot;){
+      if (alternative == &quot;two.sided&quot;){
            
             p &lt;- 2*pnorm(z)
             p
@@ -165,16 +165,16 @@ if (!is.null(p2)  | !is.null(n2) ){
       if (n2xp2.assumption.test&lt;=5 |n2x1minusp2.assumption.test&lt;=5) {
             warning(&quot;WARNING: not valid to assume normal distribution. (n2*p2&lt;5 or n2*(1-p2)&lt;5) &quot;) 
       }
-            
-      pstar &lt;- (p1+p2)/2
-      z &lt;- (p1 - p2)/sqrt((pstar * (1 - pstar)) * (1/n1 + 1/n2))
       
-      #if (alternative==&quot;two.sided&quot;){
+      pstar &lt;- (((p1*n1)+(p2*n2))/(n1+n2))      
+      z &lt;- (p2 - p1)/sqrt((pstar * (1 - pstar)) * (1/n1 + 1/n2))
+      z
+      if (alternative==&quot;two.sided&quot;){
       #  2.sided is default    
             p &lt;- 1 - pnorm(z, lower.tail = TRUE) + pnorm(z, lower.tail = FALSE)
             p
       
-      #}
+      }
       
       if (alternative==&quot;greater&quot;){
        #conditionally evaluated     
@@ -187,7 +187,10 @@ if (!is.null(p2)  | !is.null(n2) ){
             p &lt;- pnorm(z, lower.tail = TRUE)
             p
       }
- #calculating confidence interval around estimate           
+          
+      
+}
+#calculating confidence interval around estimate  
 lower &lt;- p1 + qnorm(0) * sqrt(p1 * (1 - p1)/n1)
 upper &lt;- p1 + qnorm(0.95) * sqrt(p1 * (1 - p1)/n1)
 ci &lt;- c(lower, upper)
@@ -195,13 +198,33 @@ ci
 
 output&lt;-list( Z= z, p.value = p, confidence_interval = ci)
      
-       return(output)         
-}
-            
+       return(output)            
 }
 
 #test
-Z.prop.test(p1=0.6, n1=55, p0=0.5)</code></pre>
+Z.prop.test(p1=0.6, n1=30, p0=0.8, alternative=&quot;less&quot;)</code></pre>
+<pre><code>## $Z
+## [1] -2.738613
+## 
+## $p.value
+## [1] 0.00308495
+## 
+## $confidence_interval
+## [1]      -Inf 0.7471202</code></pre>
+<pre class="r"><code>#test2
+Z.prop.test(p1=0.56,n1=25, p2=0.7, n2=30, p0=0)</code></pre>
+<pre><code>## $Z
+## [1] 1.074709
+## 
+## $p.value
+## [1] 0.2825049
+## 
+## $confidence_interval
+## [1]      -Inf 0.7232968</code></pre>
+<pre class="r"><code>#p1=0.56
+#p2=0.7
+#n1=25
+#n2=30</code></pre>
 <div id="section" class="section level2">
 <h2>[2]</h2>
 <p><strong><em>The dataset from Kamilar and Cooper has in it a large number of variables related to life history and body size. For this exercise, the end aim is to fit a simple linear regression model to predict longevity (“MaxLongevity_m”) measured in months from species’ brain size (“Brain_Size_Species_Mean”) measured in grams. Do the following for both longevity~brain size and log(longevity)~log(brain size).</em></strong></p>

@@ -127,13 +127,13 @@ $(document).ready(function () {
 n1xp1.assumption.test &lt;- n1*p1
 n1x1minusp1.assumption.test&lt;- n1*(1-p1)
 
-if (n1xp1.assumption.test&lt;5 |n1x1minusp1.assumption.test*(1-p1)&lt;5) {
+if (n1xp1.assumption.test&lt;=5 |n1x1minusp1.assumption.test&lt;=5) {
       warning(&quot;WARNING: not valid to assume normal distribution. (n1*p1&lt;5 or n1*(1-p1)&lt;5) &quot;)
       
 }
 
       
-#if (p2== NULL | n2==NULL) {
+if (is.null(p2) | is.null(n2)) {
       
  z &lt;- (p1 - p0)/sqrt(p0 * (1 - p0)/n1)
             z
@@ -154,14 +154,15 @@ if (n1xp1.assumption.test&lt;5 |n1x1minusp1.assumption.test*(1-p1)&lt;5) {
             p &lt;- 2*pnorm(z)
             p
       }
-#}
-      
-if (p2 !=NULL &amp; n2 != NULL){
+}
+# else{
+if (!is.null(p2)  | !is.null(n2) ){
      
       n2xp2.assumption.test &lt;- n2*p2
       n2x1minusp2.assumption.test&lt;- n2*(1-p2)
-
-      if (n2xp2.assumption.test&lt;=5 |n2x1minusp2.assumption.test*(1-p2)&lt;=5) {
+            
+  
+      if (n2xp2.assumption.test&lt;=5 |n2x1minusp2.assumption.test&lt;=5) {
             warning(&quot;WARNING: not valid to assume normal distribution. (n2*p2&lt;5 or n2*(1-p2)&lt;5) &quot;) 
       }
             
@@ -197,7 +198,10 @@ output&lt;-list( Z= z, p.value = p, confidence_interval = ci)
        return(output)         
 }
             
-}</code></pre>
+}
+
+#test
+Z.prop.test(p1=0.6, n1=55, p0=0.5)</code></pre>
 <div id="section" class="section level2">
 <h2>[2]</h2>
 <p><strong><em>The dataset from Kamilar and Cooper has in it a large number of variables related to life history and body size. For this exercise, the end aim is to fit a simple linear regression model to predict longevity (“MaxLongevity_m”) measured in months from species’ brain size (“Brain_Size_Species_Mean”) measured in grams. Do the following for both longevity~brain size and log(longevity)~log(brain size).</em></strong></p>

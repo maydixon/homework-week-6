@@ -17,14 +17,14 @@ Z.prop.test <- function(p1, n1, p0, p2=NULL, n2=NULL, alternative="two.sided", c
 n1xp1.assumption.test <- n1*p1
 n1x1minusp1.assumption.test<- n1*(1-p1)
 
-if (n1xp1.assumption.test<5 |n1x1minusp1.assumption.test*(1-p1)<5) {
+if (n1xp1.assumption.test<=5 |n1x1minusp1.assumption.test<=5) {
       warning("WARNING: not valid to assume normal distribution. (n1*p1<5 or n1*(1-p1)<5) ")
       
 }
 
 
       
-#if (p2== NULL | n2==NULL) {
+if (is.null(p2) | is.null(n2)) {
       
  z <- (p1 - p0)/sqrt(p0 * (1 - p0)/n1)
             z
@@ -40,31 +40,32 @@ if (n1xp1.assumption.test<5 |n1x1minusp1.assumption.test*(1-p1)<5) {
             p <- pnorm(z, lower.tail = FALSE)
             p
       }
-      if (alternative == "two.tailed"){
+      if (alternative == "two.sided"){
            
             p <- 2*pnorm(z)
             p
       }
-#}
-      
-if (p2 !=NULL & n2 != NULL){
+}
+# else{
+if (!is.null(p2)  | !is.null(n2) ){
      
       n2xp2.assumption.test <- n2*p2
       n2x1minusp2.assumption.test<- n2*(1-p2)
-
-      if (n2xp2.assumption.test<=5 |n2x1minusp2.assumption.test*(1-p2)<=5) {
+            
+  
+      if (n2xp2.assumption.test<=5 |n2x1minusp2.assumption.test<=5) {
             warning("WARNING: not valid to assume normal distribution. (n2*p2<5 or n2*(1-p2)<5) ") 
       }
-            
-      pstar <- (p1+p2)/2
-      z <- (p1 - p2)/sqrt((pstar * (1 - pstar)) * (1/n1 + 1/n2))
       
-      #if (alternative=="two.sided"){
+      pstar <- (((p1*n1)+(p2*n2))/(n1+n2))      
+      z <- (p2 - p1)/sqrt((pstar * (1 - pstar)) * (1/n1 + 1/n2))
+      z
+      if (alternative=="two.sided"){
       #  2.sided is default    
             p <- 1 - pnorm(z, lower.tail = TRUE) + pnorm(z, lower.tail = FALSE)
             p
       
-      #}
+      }
       
       if (alternative=="greater"){
        #conditionally evaluated     
@@ -77,7 +78,10 @@ if (p2 !=NULL & n2 != NULL){
             p <- pnorm(z, lower.tail = TRUE)
             p
       }
- #calculating confidence interval around estimate           
+          
+      
+}
+#calculating confidence interval around estimate  
 lower <- p1 + qnorm(0) * sqrt(p1 * (1 - p1)/n1)
 upper <- p1 + qnorm(0.95) * sqrt(p1 * (1 - p1)/n1)
 ci <- c(lower, upper)
@@ -85,12 +89,18 @@ ci
 
 output<-list( Z= z, p.value = p, confidence_interval = ci)
      
-       return(output)         
-}
-            
+       return(output)            
 }
 
-````
+#test
+Z.prop.test(p1=0.6, n1=30, p0=0.8, alternative="less")
+#test2
+Z.prop.test(p1=0.56,n1=25, p2=0.7, n2=30, p0=0)
+#p1=0.56
+#p2=0.7
+#n1=25
+#n2=30
+```
 ##[2] 
 ***The dataset from Kamilar and Cooper has in it a large number of variables related to life history and body size. For this exercise, the end aim is to fit a simple linear regression model to predict longevity ("MaxLongevity_m") measured in months from species' brain size ("Brain_Size_Species_Mean") measured in grams. Do the following for both longevity~brain size and log(longevity)~log(brain size).***
 
